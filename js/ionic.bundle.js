@@ -9,7 +9,7 @@
  * Copyright 2015 Drifty Co.
  * http://drifty.com/
  *
- * Ionic, v1.2.0-nightly-1853
+ * Ionic, v1.2.0-nightly-1855
  * A powerful HTML5 mobile app framework.
  * http://ionicframework.com/
  *
@@ -25,7 +25,7 @@
 // build processes may have already created an ionic obj
 window.ionic = window.ionic || {};
 window.ionic.views = {};
-window.ionic.version = '1.2.0-nightly-1853';
+window.ionic.version = '1.2.0-nightly-1855';
 
 (function (ionic) {
 
@@ -50217,7 +50217,7 @@ angular.module('ui.router.state')
  * Copyright 2015 Drifty Co.
  * http://drifty.com/
  *
- * Ionic, v1.2.0-nightly-1853
+ * Ionic, v1.2.0-nightly-1855
  * A powerful HTML5 mobile app framework.
  * http://ionicframework.com/
  *
@@ -57068,6 +57068,11 @@ IonicModule
         screenY: e.screenY
       }];
 
+      // Force mouse events to have had a down event first
+      if(!startY && e.type == 'mousemove') {
+        return;
+      }
+
       // if multitouch or regular scroll event, get out immediately
       if (!canOverscroll || e.touches.length > 1) {
         return;
@@ -57237,6 +57242,21 @@ IonicModule
     }
 
 
+    var touchMoveEvent, touchEndEvent;
+    if (window.navigator.pointerEnabled) {
+      //touchStartEvent = 'pointerdown';
+      touchMoveEvent = 'pointermove';
+      touchEndEvent = 'pointerup';
+    } else if (window.navigator.msPointerEnabled) {
+      //touchStartEvent = 'MSPointerDown';
+      touchMoveEvent = 'MSPointerMove';
+      touchEndEvent = 'MSPointerUp';
+    } else {
+      //touchStartEvent = 'touchstart';
+      touchMoveEvent = 'touchmove';
+      touchEndEvent = 'touchend';
+    }
+
     self.init = function() {
       scrollParent = $element.parent().parent()[0];
       scrollChild = $element.parent()[0];
@@ -57246,8 +57266,9 @@ IonicModule
         throw new Error('Refresher must be immediate child of ion-content or ion-scroll');
       }
 
-      ionic.on('touchmove', handleTouchmove, scrollChild);
-      ionic.on('touchend', handleTouchend, scrollChild);
+
+      ionic.on(touchMoveEvent, handleTouchmove, scrollChild);
+      ionic.on(touchEndEvent, handleTouchend, scrollChild);
       ionic.on('mousedown', handleMousedown, scrollChild);
       ionic.on('mousemove', handleTouchmove, scrollChild);
       ionic.on('mouseup', handleTouchend, scrollChild);
@@ -57258,8 +57279,8 @@ IonicModule
     };
 
     function destroy() {
-      ionic.off('touchmove', handleTouchmove, scrollChild);
-      ionic.off('touchend', handleTouchend, scrollChild);
+      ionic.off(touchMoveEvent, handleTouchmove, scrollChild);
+      ionic.off(touchEndEvent, handleTouchend, scrollChild);
       ionic.off('mousedown', handleMousedown, scrollChild);
       ionic.off('mousemove', handleTouchmove, scrollChild);
       ionic.off('mouseup', handleTouchend, scrollChild);
